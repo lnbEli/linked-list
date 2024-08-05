@@ -32,6 +32,16 @@ function nodeAtIndex(node, index, count = 0) {
   }
 }
 
+function listContainsValue(node, value) {
+  if (!node) {
+    return false;
+  } else if (node.value === value) {
+    return true;
+  } else {
+    return listContainsValue(node.nextNode, value);
+  }
+}
+
 class LinkedList {
   headNode = null;
   tailNode = null;
@@ -79,6 +89,27 @@ class LinkedList {
   at(index) {
     return nodeAtIndex(this.headNode, index);
   }
+
+  pop() {
+    if (!this.headNode) {
+      return;
+    } else if (!this.headNode.nextNode) {
+      this.headNode = null;
+    } else if (!this.headNode.nextNode.nextNode) {
+      //Why do I need to change both these refs
+      this.tailNode = null;
+      this.headNode.nextNode = null;
+    } else {
+      const penultimateNode = this.at(this.size() - 2);
+      const antepenultimateNode = this.at(this.size() - 3);
+      this.tailNode.value = penultimateNode.value;
+      antepenultimateNode.nextNode = this.tailNode;
+    }
+  }
+
+  contains(value) {
+    return listContainsValue(this.headNode, value);
+  }
 }
 
 const list = new LinkedList();
@@ -86,12 +117,14 @@ const list = new LinkedList();
 list.append(100);
 list.append(90);
 list.append(80);
-list.prepend("hello");
-list.prepend("hi");
+list.append(70);
+// list.prepend("hello");
+// list.prepend("hi");
+// list.pop();
 
-// console.log(inspect(list, { showHidden: false, depth: null, colors: true }));
+console.log(inspect(list, { showHidden: false, depth: null, colors: true }));
 
-console.log(list.at(8));
+console.log(list.contains(90));
 
 //1.append(value) adds a new node containing value to the end of the list
 //2.prepend(value) adds a new node containing value to the start of the list

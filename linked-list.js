@@ -6,11 +6,11 @@ class Node {
     this.nextNode = nextNode;
   }
 }
-function returnPenultimateNode(node) {
-  if (node.nextNode.nextNode === null) {
-    return node;
-  } else return returnPenultimateNode(node.nextNode);
-}
+// function returnPenultimateNode(node) {
+//   if (node.nextNode.nextNode === null) {
+//     return node;
+//   } else return returnPenultimateNode(node.nextNode);
+// }
 
 function returnLinkedListLength(node, count = 0) {
   if (!node) {
@@ -53,36 +53,37 @@ function indexOfValue(node, value, count = 0) {
   }
 }
 
+function nodeValuesToString(node, string = "") {
+  if (!node) {
+    string += `null`;
+    return string;
+  } else {
+    string += `( ${node.value} ) -> `;
+    return nodeValuesToString(node.nextNode, string);
+  }
+}
+
 class LinkedList {
   headNode = null;
   tailNode = null;
 
   append(value) {
+    const newNode = new Node(value);
     if (!this.headNode) {
-      this.headNode = new Node(value, this.tailNode);
-    } else if (this.headNode && !this.tailNode) {
-      this.tailNode = new Node(value);
-      this.headNode.nextNode = this.tailNode;
+      this.headNode = newNode;
+      this.tailNode = newNode;
     } else {
-      const node = new Node(this.tailNode.value, this.tailNode);
-      const penultimateNode = returnPenultimateNode(this.headNode);
-      penultimateNode.nextNode = node;
-      this.tailNode.value = value;
+      this.tailNode.nextNode = newNode;
+      this.tailNode = newNode;
     }
   }
 
   prepend(value) {
-    if (!this.headNode) {
-      this.headNode = new Node(value, this.tailNode);
-    } else if (this.headNode && !this.tailNode) {
-      this.tailNode = new Node(this.headNode.value);
-      this.headNode.value = value;
-      this.headNode.nextNode = this.tailNode;
-    } else {
-      const node = new Node(this.headNode.value, this.headNode.nextNode);
-      this.headNode.value = value;
-      this.headNode.nextNode = node;
+    const newNode = new Node(value, this.headNode);
+    if (!this.tailNode) {
+      this.tailNode = newNode;
     }
+    this.headNode = newNode;
   }
 
   size() {
@@ -106,15 +107,14 @@ class LinkedList {
       return;
     } else if (!this.headNode.nextNode) {
       this.headNode = null;
-    } else if (!this.headNode.nextNode.nextNode) {
-      //Why do I need to change both these refs
       this.tailNode = null;
-      this.headNode.nextNode = null;
     } else {
-      const penultimateNode = this.at(this.size() - 2);
-      const antepenultimateNode = this.at(this.size() - 3);
-      this.tailNode.value = penultimateNode.value;
-      antepenultimateNode.nextNode = this.tailNode;
+      let currentNode = this.headNode;
+      while (currentNode.nextNode !== this.tailNode) {
+        currentNode = currentNode.nextNode;
+      }
+      currentNode.nextNode = null;
+      this.tailNode = currentNode;
     }
   }
 
@@ -125,23 +125,55 @@ class LinkedList {
   find(value) {
     return indexOfValue(this.headNode, value);
   }
+
+  toString() {
+    return nodeValuesToString(this.headNode);
+  }
+
+  //if Added at Index that doesn't exist it will add to end of list
+  insertAt(value, index) {
+    if (index === 0) {
+      this.prepend(value);
+    } else if (index >= this.size()) {
+      this.append(value);
+    } else {
+      const previousNode = this.at(index - 1);
+      const newNode = new Node(value, previousNode.newNode);
+      previousNode.nextNode = newNode;
+    }
+  }
+
+  removeAt(index) {
+    if (index === 0) {
+      this.headNode.value = this.headNode.nextNode.value;
+      this.headNode.nextNode = this.headNode.nextNode.nextNode;
+    } else if (index >= this.size()) {
+      console.error("An error occurred:", "Index doesn't exist");
+    } else if (index === this.size() - 1) {
+      const penultimateNode = this.at(this.size() - 2);
+      const antepenultimateNode = this.at(this.size() - 3);
+      this.tailNode.value = penultimateNode.value;
+      antepenultimateNode.nextNode = this.tailNode;
+    } else {
+      const previousNode = this.at(index - 1);
+      const currentNodeAtIndex = previousNode.nextNode;
+      const nextNode = currentNodeAtIndex.nextNode;
+      previousNode.nextNode = nextNode;
+    }
+  }
 }
 
 const list = new LinkedList();
 
-list.append(100);
-list.append(90);
-list.append("jhgjhjhg");
-list.append(70);
-// list.prepend("hello");
-// list.prepend("hi");
-// list.pop();
+list.append("Dixieland");
+list.append("and");
+list.append("Dixie");
+// list.append("Swing");
+// list.append("Bebop");
+// list.append("Cool Jazz");
+// list.append("Free Jazz");
+// list.append("Fusion");
 
-// console.log(inspect(list, { showHidden: false, depth: null, colors: true }));
+console.log(inspect(list, { showHidden: false, depth: null, colors: true }));
 
-console.log(list.find("jhgjhjhg"));
-
-//1.append(value) adds a new node containing value to the end of the list
-//2.prepend(value) adds a new node containing value to the start of the list
-//3.size returns the total number of nodes in the list
-//4.head returns the first node in the list
+console.log(list.toString());

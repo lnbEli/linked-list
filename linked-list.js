@@ -42,6 +42,17 @@ function listContainsValue(node, value) {
   }
 }
 
+function indexOfValue(node, value, count = 0) {
+  if (!node) {
+    return null;
+  } else if (node.value === value) {
+    return count;
+  } else {
+    count++;
+    return indexOfValue(node.nextNode, value, count);
+  }
+}
+
 class LinkedList {
   headNode = null;
   tailNode = null;
@@ -110,21 +121,25 @@ class LinkedList {
   contains(value) {
     return listContainsValue(this.headNode, value);
   }
+
+  find(value) {
+    return indexOfValue(this.headNode, value);
+  }
 }
 
 const list = new LinkedList();
 
 list.append(100);
 list.append(90);
-list.append(80);
+list.append("jhgjhjhg");
 list.append(70);
 // list.prepend("hello");
 // list.prepend("hi");
 // list.pop();
 
-console.log(inspect(list, { showHidden: false, depth: null, colors: true }));
+// console.log(inspect(list, { showHidden: false, depth: null, colors: true }));
 
-console.log(list.contains(90));
+console.log(list.find("jhgjhjhg"));
 
 //1.append(value) adds a new node containing value to the end of the list
 //2.prepend(value) adds a new node containing value to the start of the list

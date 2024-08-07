@@ -1,72 +1,13 @@
-import { inspect } from "util";
-
-class Node {
-  constructor(value = null, nextNode = null) {
-    this.value = value;
-    this.nextNode = nextNode;
-  }
-}
-// function returnPenultimateNode(node) {
-//   if (node.nextNode.nextNode === null) {
-//     return node;
-//   } else return returnPenultimateNode(node.nextNode);
-// }
-
-function returnLinkedListLength(node, count = 0) {
-  if (!node) {
-    return count;
-  } else {
-    count++;
-    return returnLinkedListLength(node.nextNode, count);
-  }
-}
-
-function nodeAtIndex(node, index, count = 0) {
-  if (node === null) {
-    return null;
-  } else if (index === count) {
-    return node;
-  } else {
-    count++;
-    return nodeAtIndex(node.nextNode, index, count);
-  }
-}
-
-function listContainsValue(node, value) {
-  if (!node) {
-    return false;
-  } else if (node.value === value) {
-    return true;
-  } else {
-    return listContainsValue(node.nextNode, value);
-  }
-}
-
-function indexOfValue(node, value, count = 0) {
-  if (!node) {
-    return null;
-  } else if (node.value === value) {
-    return count;
-  } else {
-    count++;
-    return indexOfValue(node.nextNode, value, count);
-  }
-}
-
-function nodeValuesToString(node, string = "") {
-  if (!node) {
-    string += `null`;
-    return string;
-  } else {
-    string += `( ${node.value} ) -> `;
-    return nodeValuesToString(node.nextNode, string);
-  }
-}
+import Node from "./Node.js";
 
 class LinkedList {
-  headNode = null;
-  tailNode = null;
+  constructor() {
+    // Initialise the head and tail of the list as null
+    this.headNode = null;
+    this.tailNode = null;
+  }
 
+  // Method to append a new node with the given value to the end of the list
   append(value) {
     const newNode = new Node(value);
     if (!this.headNode) {
@@ -77,7 +18,7 @@ class LinkedList {
       this.tailNode = newNode;
     }
   }
-
+  // Method to prepend a new node with the given value to the start of the list
   prepend(value) {
     const newNode = new Node(value, this.headNode);
     if (!this.tailNode) {
@@ -85,9 +26,13 @@ class LinkedList {
     }
     this.headNode = newNode;
   }
-
-  size() {
-    return returnLinkedListLength(this.headNode);
+  // Method to calculate the size (length) of the list
+  size(node = this.headNode, count = 0) {
+    if (!node) {
+      return count;
+    } else {
+      return this.size(node.nextNode, ++count);
+    }
   }
 
   head() {
@@ -97,15 +42,23 @@ class LinkedList {
   tail() {
     return this.tailNode;
   }
-
-  at(index) {
-    return nodeAtIndex(this.headNode, index);
+  // Method to return the node at a specific index
+  at(index, node = this.headNode, count = 0) {
+    if (!node) {
+      return null;
+    } else if (index === count) {
+      return node;
+    } else {
+      return this.at(index, node.nextNode, ++count);
+    }
   }
-
+  // Method to remove the last node from the list
   pop() {
     if (!this.headNode) {
+      // If the list is empty
       return;
     } else if (!this.headNode.nextNode) {
+      // If the list has only one node
       this.headNode = null;
       this.tailNode = null;
     } else {
@@ -117,63 +70,74 @@ class LinkedList {
       this.tailNode = currentNode;
     }
   }
-
-  contains(value) {
-    return listContainsValue(this.headNode, value);
+  // Method to check if a value is contained in the list
+  contains(value, node = this.headNode) {
+    if (!node) {
+      return false;
+    } else if (node.value === value) {
+      return true;
+    } else {
+      return this.contains(value, node.nextNode);
+    }
+  }
+  // Method to find the index of the node containing a specific value
+  find(value, node = this.headNode, count = 0) {
+    if (!node) {
+      return null;
+    } else if (node.value === value) {
+      return count;
+    } else {
+      return this.find(value, node.nextNode, ++count);
+    }
+  }
+  // Method to convert the list to a string
+  toString(node = this.headNode, string = "") {
+    if (!node) {
+      string += `null`;
+      return string;
+    } else {
+      string += `( ${node.value} ) -> `;
+      return this.toString(node.nextNode, string);
+    }
   }
 
-  find(value) {
-    return indexOfValue(this.headNode, value);
-  }
-
-  toString() {
-    return nodeValuesToString(this.headNode);
-  }
-
-  //if Added at Index that doesn't exist it will add to end of list
+  // Method to insert a node at a specific index
+  // If added at an index that doesn't exist, it will add to the end of the list
   insertAt(value, index) {
-    if (index === 0) {
+    if (index < 0) {
+      console.error("An error occurred:", "Index must be positive integer");
+    } else if (index === 0) {
       this.prepend(value);
     } else if (index >= this.size()) {
       this.append(value);
     } else {
       const previousNode = this.at(index - 1);
-      const newNode = new Node(value, previousNode.newNode);
+      const newNode = new Node(value, previousNode.nextNode);
       previousNode.nextNode = newNode;
     }
   }
 
+  // Method to remove a node at a specific index
   removeAt(index) {
-    if (index === 0) {
-      this.headNode.value = this.headNode.nextNode.value;
-      this.headNode.nextNode = this.headNode.nextNode.nextNode;
-    } else if (index >= this.size()) {
+    if (!this.headNode) {
+      console.error("An error occurred:", "List is empty");
+    } else if (index === 0) {
+      this.headNode = this.headNode.nextNode;
+      if (!this.headNode) {
+        this.tailNode = null;
+      }
+    } else if (index < 0 || index >= this.size()) {
       console.error("An error occurred:", "Index doesn't exist");
-    } else if (index === this.size() - 1) {
-      const penultimateNode = this.at(this.size() - 2);
-      const antepenultimateNode = this.at(this.size() - 3);
-      this.tailNode.value = penultimateNode.value;
-      antepenultimateNode.nextNode = this.tailNode;
     } else {
       const previousNode = this.at(index - 1);
-      const currentNodeAtIndex = previousNode.nextNode;
-      const nextNode = currentNodeAtIndex.nextNode;
-      previousNode.nextNode = nextNode;
+      const nodeToRemove = previousNode.nextNode;
+      previousNode.nextNode = nodeToRemove.nextNode;
+
+      if (nodeToRemove === this.tailNode) {
+        this.tailNode = previousNode;
+      }
     }
   }
 }
 
 const list = new LinkedList();
-
-list.append("Dixieland");
-list.append("and");
-list.append("Dixie");
-// list.append("Swing");
-// list.append("Bebop");
-// list.append("Cool Jazz");
-// list.append("Free Jazz");
-// list.append("Fusion");
-
-console.log(inspect(list, { showHidden: false, depth: null, colors: true }));
-
-console.log(list.toString());
